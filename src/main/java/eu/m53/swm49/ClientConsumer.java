@@ -11,27 +11,27 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class ClientConsumer {
 
-	 private static String brokerURL = "tcp://localhost:61616";
-	    private static ConnectionFactory factory;
-	    private Connection connection;
-	    private Session session;
-	    	    
-	    public ClientConsumer() throws JMSException {
-	    	factory = new ActiveMQConnectionFactory(brokerURL);
-	    	connection = factory.createConnection();
-	        connection.start();
-	        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    }
-	    
-	    public void close() throws JMSException {
-	        if (connection != null) {
-	            connection.close();
-	        }
-	    }    
-		
-		public Session getSession() {
-			return session;
-		}
+    private static ProcessConfig config = ProcessConfig.getInstance();
 
+    private static String brokerURL = config.getJmsServer();
+    private static ConnectionFactory factory;
+    private Connection connection;
+    private Session session;
+    public ClientConsumer() throws JMSException {
+        factory = new ActiveMQConnectionFactory(brokerURL);
+        connection = factory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    }
+
+    public void close() throws JMSException {
+        if (connection != null) {
+            connection.close();
+        }
+    }    
+
+    public Session getSession() {
+        return session;
+    }
 
 }

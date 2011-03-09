@@ -13,7 +13,9 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class ClientPublisher {
 
-    private static String brokerURL = "tcp://localhost:61616";
+    private static ProcessConfig config = ProcessConfig.getInstance();
+    
+    private static String brokerURL = config.getJmsServer();
     private static ConnectionFactory factory;
     private Connection connection;
     private Session session;
@@ -26,8 +28,8 @@ public class ClientPublisher {
     private String jobs[] = new String[]{"suspend", "delete", "controller"};
     
     public ClientPublisher() throws JMSException {
-    	factory = new ActiveMQConnectionFactory(brokerURL);
-    	connection = factory.createConnection();
+        factory = new ActiveMQConnectionFactory(brokerURL);
+        connection = factory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         producer = session.createProducer(null);
@@ -39,8 +41,8 @@ public class ClientPublisher {
         }
     }    
     
-	public static void main(String[] args) throws JMSException {
-    	ClientPublisher publisher = new ClientPublisher();
+    public static void main(String[] args) throws JMSException {
+        ClientPublisher publisher = new ClientPublisher();
         while (total < 1000) {
             for (int i = 0; i < count; i++) {
                 publisher.sendMessage();
@@ -54,7 +56,7 @@ public class ClientPublisher {
           }
         publisher.close();
 
-	}
+    }
 
     public void sendMessage() throws JMSException {
         int idx = 0;
@@ -69,7 +71,7 @@ public class ClientPublisher {
         Message message = session.createObjectMessage(id++);
         System.out.println("Sending: id: " + ((ObjectMessage)message).getObject() + " on queue: " + destination);
         producer.send(destination, message);
-    }	
+    }    
 
 }
 
