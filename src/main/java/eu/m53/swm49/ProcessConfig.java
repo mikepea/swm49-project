@@ -17,5 +17,13 @@ public class ProcessConfig {
     public String getJmsServer() {
         return jmsServer;
     }
+    
+    public String getQueueBase() {
+        return "swm49";
+    }
+    
+    public String getTopicBase() {
+        return "swm49";
+    }
 
 }

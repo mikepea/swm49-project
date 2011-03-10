@@ -5,6 +5,18 @@
   <version>0.0.1-SNAPSHOT</version>
   <modules>
   </modules>
+  <repositories>
+    <repository>
+      <id>gson</id>
+      <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
   <dependencies>
    <dependency>
     <groupId>jms</groupId>
@@ -15,6 +27,13 @@
       <groupId>org.apache.activemq</groupId>
       <artifactId>activemq-core</artifactId>
       <version>5.2.0</version>
+    </dependency>
+   <!--  Gson: Java to Json conversion -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>1.6</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>

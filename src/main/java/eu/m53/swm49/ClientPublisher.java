@@ -6,7 +6,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -21,12 +21,7 @@ public class ClientPublisher {
     private Session session;
     private MessageProducer producer;
     
-    private static int count = 10;
-    private static int total;
-    private static int id = 1000000;
-    
-    private String jobs[] = new String[]{"suspend", "delete", "controller"};
-    
+        
     public ClientPublisher() throws JMSException {
         factory = new ActiveMQConnectionFactory(brokerURL);
         connection = factory.createConnection();
@@ -41,37 +36,19 @@ public class ClientPublisher {
         }
     }    
     
-    public static void main(String[] args) throws JMSException {
-        ClientPublisher publisher = new ClientPublisher();
-        while (total < 1000) {
-            for (int i = 0; i < count; i++) {
-                publisher.sendMessage();
-            }
-            total += count;
-            System.out.println("Published '" + count + "' of '" + total + "' job messages");
-            try {
-              Thread.sleep(1000);
-            } catch (InterruptedException x) {
-            }
-          }
-        publisher.close();
-
-    }
-
-    public void sendMessage() throws JMSException {
-        int idx = 0;
-        while (true) {
-            idx = (int)Math.round(jobs.length * Math.random());
-            if (idx < jobs.length) {
-                break;
-            }
-        }
-        String job = jobs[idx];
-        Destination destination = session.createQueue("swm49." + job);
-        Message message = session.createObjectMessage(id++);
-        System.out.println("Sending: id: " + ((ObjectMessage)message).getObject() + " on queue: " + destination);
+    public void sendQueueMessage(String job, String text) throws JMSException {
+        Destination destination = session.createQueue(config.getQueueBase() + "." + job);
+        Message message = session.createTextMessage(text);
+        System.out.println("Sending message: " + ((TextMessage)message).getText() + " on queue: " + destination);
         producer.send(destination, message);
-    }    
+    }
+    
+    public void sendTopicMessage(String job, String text) throws JMSException {
+        Destination destination = session.createTopic(config.getTopicBase() + "." + job);
+        Message message = session.createTextMessage(text);
+        System.out.println("Sending message: " + ((TextMessage)message).getText() + " on topic: " + destination);
+        producer.send(destination, message);
+    }
 
 }
 
