@@ -11,14 +11,19 @@
 package eu.m53.swm49;
 
 import com.google.gson.Gson;
+import javax.jms.JMSException;
 
 public class Task {
+    
+    private static ProcessState state = ProcessState.getInstance();
+
     private String name;
     private String method = "restart";
     private Boolean lock_required = false;
     private Boolean is_locked = false;
     private String results;
     private Integer lock_wait_count = 0;
+
 
     public Task() {};
     
@@ -52,10 +57,7 @@ public class Task {
         this.is_locked = true;
     }
     
-    public void releaseLock() {
-        // do stuff, then:
-        this.is_locked = false;
-    }
+
     
     // Return the object as JSON, for passing over message queue
     public String getTaskAsJSON() {
@@ -63,21 +65,58 @@ public class Task {
         return gson.toJson(this);
     }
     
+    private void actuallyExecute() {
+        // private, since we need to wrap locking logic around if needed.
+        // TODO: actually execute something!
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
     public void execute() {
         if (this.getLockRequired()) {
             if (this.isLocked()) {
-                // can't execute this command
+                // can't execute this command try to get a lock.
                 System.out.println("Can't execute locked task: " + this.getName());
-                System.out.println("Can't execute locked task: " + this.getName());
-                // send message to controller queue requesting lock.
+                this.requestLock();
             } else {
                 // lock has been released!
-                System.out.println("Executing unlocked task: " + this.getName());
+                System.out.println("Executing singleton task: " + this.getName());
+                this.actuallyExecute();
+                this.releaseLock();
+                state.clearCurrentTask();
             }
             
         } else {
-            System.out.println("Executing task: " + this.getName());
+            System.out.println("Executing concurrent task: " + this.getName());
+            this.actuallyExecute();
+            state.clearCurrentTask();
         }
+    }
+    
+    public void requestLock() {
+        Lock lock = new Lock(this.name, state.getMyID());
+        try {
+            lock.submit();
+        } catch (JMSException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    public void releaseLock() {
+        // TODO do stuff, then:
+        Lock lock = new Lock(this.name, state.getMyID());
+        lock.setType("unlocked");
+        try {
+            lock.submit();
+        } catch (JMSException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        this.is_locked = false;
     }
     
 }

@@ -18,6 +18,10 @@ public class ProcessConfig {
         return jmsServer;
     }
     
+    public String getLoggerBase() {
+        return "swm49";
+    }
+    
     public String getQueueBase() {
         return "swm49";
     }

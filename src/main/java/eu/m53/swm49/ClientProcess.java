@@ -26,14 +26,21 @@ public class ClientProcess {
             MessageConsumer messageConsumer = consumer.getSession().createConsumer(destination);
             if ( job.equals("controller") ) {
                 messageConsumer.setMessageListener(new ControllerListener(job));
+            } else if ( job.equals("locks")) {
+                messageConsumer.setMessageListener(new LockListener(job));
             } else {
                 messageConsumer.setMessageListener(new ClientListener(job));
             }
         }
         while (true) {
-            System.out.println("ID: " + state.getMyID() + " - END!");
+            //System.out.println("ID: " + state.getMyID() + " - Loop!");
+            Task task = state.currentTask();
+
             try {
-                Thread.sleep(4000);
+                if ( task != null ) {
+                    task.execute();
+                }
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 System.out.println("ID: " + state.getMyID() + " - Sleep interrupted!");

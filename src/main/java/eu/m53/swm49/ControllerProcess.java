@@ -4,9 +4,12 @@ import javax.jms.Destination;
 import javax.jms.MessageConsumer;
 import javax.jms.JMSException;
 
+import org.apache.log4j.Logger;
+
 public class ControllerProcess {
 
     private static ProcessConfig config = ProcessConfig.getInstance();
+    private Logger logger = Logger.getLogger(config.getLoggerBase());
     
     private static String jobs[] = new String[]{"locks", "controller"};
     private static ProcessState state = ProcessState.getInstance();
@@ -15,6 +18,8 @@ public class ControllerProcess {
      * @param args
      */
     public static void main(String[] args) throws JMSException {
+        
+        state.promoteToController();
         
         // start consuming messages from locks topic (lock requests)
         ClientConsumer consumer = new ClientConsumer();
@@ -31,7 +36,7 @@ public class ControllerProcess {
         }
         
         while (true) {
-            System.out.println("Controller ID: " + state.getMyID() + " - Loop!");
+            //System.out.println("Controller ID: " + state.getMyID() + " - Loop!");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

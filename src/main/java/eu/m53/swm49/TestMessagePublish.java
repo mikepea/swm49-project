@@ -13,6 +13,7 @@ public class TestMessagePublish {
     public static void main(String[] args) throws JMSException {
         
         Task task1 = new Task("bob");
+        task1.setLockRequired(true);
         ClientPublisher publisher = new ClientPublisher();
         publisher.sendTopicMessage("tasks", task1.getTaskAsJSON());
         publisher.close();

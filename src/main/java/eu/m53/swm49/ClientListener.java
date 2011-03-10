@@ -20,7 +20,12 @@ public class ClientListener implements MessageListener {
             // we've received a message, pull out the text and work out what it is.
             Gson gson = new Gson();
             Task task = gson.fromJson(((TextMessage) message).getText(), Task.class);
-            task.execute();
+            if ( state.currentTask() != null ) {
+                // we already have a task
+                // TODO: need to add this new task to a queue?
+            } else {
+                state.setCurrentTask(task);
+            }
             
         } catch (Exception e) {
             System.out.println("ID " + state.getMyID() + ": Exception;");
