@@ -28,7 +28,7 @@ public class LockTable {
     
     public boolean setLockBy(String task, Integer id) {
         
-        if ( this.returnWhoLockedBy(task) == id) {
+        if ( this.returnWhoLockedBy(task).equals(id) ) {
             System.out.println("setLockBy: " + task + ", " + id + " - already locked by this ID.");
             return true; // we're just trying to set a lock that is already in place.
         } else if ( this.checkLocked(task) ) {

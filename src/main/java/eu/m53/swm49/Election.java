@@ -1,37 +1,32 @@
-/*
- * Lock.java
- * 
- * Format for a lock request:
- *  'i would like to ensure that no-one else handles task name 'bob' whilst I am handling it.'
- *  
- */
 package eu.m53.swm49;
 
 import javax.jms.JMSException;
-
 import com.google.gson.Gson;
 
-public class Lock {
-    private String task;
+public class Election {
+    
     private Integer requestingID;
-    private Integer grantingID;
-    private String type = "request"; // or 'granted'
+    private String type = "request"; // or 'announcement'
     private static ProcessState state = ProcessState.getInstance();
+    private static ProcessConfig config = ProcessConfig.getInstance();
+    
+    private long time_created;
+    
+    private Election() {};
 
-    
-    public Lock() {};
-    
-    public Lock(String task, Integer requestingID) {
+    public Election(Integer requestingID) {
         this.requestingID = requestingID;
-        this.task = task;
-    }
-    
-    public String getTask() {
-        return this.task;
+        this.time_created = System.currentTimeMillis();
     }
 
-    public void setTask(String task) {
-        this.task = task;
+    public Election(String type, Integer requestingID) {
+        this.requestingID = requestingID;
+        this.type = type;
+        this.time_created = System.currentTimeMillis();
+    }
+    
+    public long getTimeCreated() {
+        return this.time_created;
     }
     
     public Integer getRequestingID() {
@@ -41,24 +36,14 @@ public class Lock {
     public void setRequestingID(Integer requestingID) {
         this.requestingID = requestingID;
     }
-    
-    public Integer getGrantingID() {
-        return this.grantingID;
-    }
-
-    public void setGrantingID(Integer grantingID) {
-        this.grantingID = grantingID;
-    }
-    
+ 
     public String getType() {
         return this.type;
     }
 
     public void setType(String type) {
         if ( type.equals("request") ||
-             type.equals("denied") ||
-             type.equals("unlocked") ||
-             type.equals("granted") ) {
+             type.equals("announcement") ) {
             this.type = type;
         } else {
             System.out.println("URP! cannot setType!");
@@ -75,20 +60,19 @@ public class Lock {
         if (this.type.equals("request")) {
             System.out.println("ID: " + 
                     state.getMyID() + 
-                    " - Submitting lock request for task: " 
-                    + this.getTask());
+                    " - Submitting election request from ID: " 
+                    + this.getRequestingID());
+            state.setCurrentElection(this);
         } else {
             System.out.println("ID: " + 
                     state.getMyID() + 
-                    " - Sending lock message '" +
-                    this.type + 
-                    "' for task: " + this.getTask() +
-                    " to ID " + this.getRequestingID() );
+                    " - Sending election announcement that I am the boss!");
         }
         
         ClientPublisher publisher = new ClientPublisher();
-        publisher.sendTopicMessage("locks", this.serializeAsJSON());
+        publisher.sendTopicMessage("controller", this.serializeAsJSON());
         publisher.close();
     }
+       
 
 }

@@ -18,12 +18,13 @@ public class Task {
     private static ProcessState state = ProcessState.getInstance();
 
     private String name;
-    private String method = "restart";
+    //private String method = "restart";
     private Boolean lock_required = false;
     private Boolean is_locked = false;
-    private String results;
+    //private String results;
+    
+    // counter for non-receipt of a lock ack message, to detect controller failure.
     private Integer lock_wait_count = 0;
-
 
     public Task() {};
     
@@ -38,6 +39,18 @@ public class Task {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Integer getLockWaitCount() {
+        return this.lock_wait_count;
+    }
+    
+    public void incLockWaitCount() {
+        this.lock_wait_count++;
+    }
+    
+    public void resetLockWaitCount() {
+        this.lock_wait_count = 0;
     }
     
     public void setLockRequired(Boolean bool) {
@@ -57,8 +70,6 @@ public class Task {
         this.is_locked = true;
     }
     
-
-    
     // Return the object as JSON, for passing over message queue
     public String getTaskAsJSON() {
         Gson gson = new Gson();
@@ -75,7 +86,9 @@ public class Task {
             e.printStackTrace();
         }
     }
+    
     public void execute() {
+        this.incLockWaitCount();
         if (this.getLockRequired()) {
             if (this.isLocked()) {
                 // can't execute this command try to get a lock.
@@ -83,7 +96,7 @@ public class Task {
                 this.requestLock();
             } else {
                 // lock has been released!
-                System.out.println("Executing singleton task: " + this.getName());
+                System.out.println("Executing non-concurrent task: " + this.getName());
                 this.actuallyExecute();
                 this.releaseLock();
                 state.clearCurrentTask();

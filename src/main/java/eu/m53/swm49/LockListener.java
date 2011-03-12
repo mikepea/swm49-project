@@ -35,8 +35,11 @@ public class LockListener implements MessageListener {
                 processLockGranted(lock);
             } else if ( lock.getType().equals("unlocked") ) {
                 processLockUnlocked(lock);
+            } else if ( lock.getType().equals("denied") ) {
+                processLockDenied(lock);
+ 
             } else {
-                this.processLockRequest(lock);
+                processLockRequest(lock);
             }
             
         } catch (Exception e) {
@@ -53,8 +56,8 @@ public class LockListener implements MessageListener {
                 // sweet, lock granted
                 this.sendLockGrantedMessage(lock);
             } else {
-                // lock failed.
-                System.out.println("ID " + state.getMyID() + ": Lock FAILED! - " + lock.serializeAsJSON());
+                // lock denied.
+                this.sendLockDeniedMessage(lock);
             }
         } // if we're a Client, ignore lock requests.
     }
@@ -81,6 +84,23 @@ public class LockListener implements MessageListener {
         }
     }
 
+    public void processLockDenied(Lock lock) {
+        if ( state.amController() ) {
+            // ignore - am controller.
+            // TODO: Controller should still be able to act as a client.
+        } else {
+            // we're a client, check to see if the granted lock is for our task.
+            // TODO: need to check that message came from our expected controller.
+            //       once we have elections and the possibility of >1 controller.
+            if ( lock.getRequestingID().equals(state.getMyID()) ) {
+                // sweet, it's for us.
+                System.out.println("ID " + state.getMyID() + ": Denied task! - " + lock.getTask());
+                Task task = state.currentTask();
+                task.resetLockWaitCount();
+            }
+        }
+    }
+
     public void processLockUnlocked(Lock lock) {
         if ( state.amController() ) {
             // ignore - am controller.
@@ -98,10 +118,25 @@ public class LockListener implements MessageListener {
             // Ignore - we're a client so have nothing to unlock.
         }
     }
+
     public void sendLockGrantedMessage(Lock lock) {
         // we are a copy of the original lock, so modify it and send it back.
         System.out.println("ID " + state.getMyID() + ": Granting Lock");
         lock.setType("granted");
+        lock.setGrantingID(state.getMyID());
+        try {
+            lock.submit();
+        } catch (JMSException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+    
+    public void sendLockDeniedMessage(Lock lock) {
+        // we are a copy of the original lock, so modify it and send it back.
+        System.out.println("ID " + state.getMyID() + ": Denying Lock");
+        lock.setType("denied");
         lock.setGrantingID(state.getMyID());
         try {
             lock.submit();

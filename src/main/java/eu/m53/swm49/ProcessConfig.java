@@ -29,5 +29,13 @@ public class ProcessConfig {
     public String getTopicBase() {
         return "swm49";
     }
+    
+    public Integer getMaxLockWaitCount() {
+        return 5;
+    }
+    
+    public Integer getMaxElectionWaitMillis() {
+        return 5000;
+    }
 
 }

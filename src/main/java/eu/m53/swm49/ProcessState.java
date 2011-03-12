@@ -17,6 +17,7 @@ public class ProcessState {
     private Integer myID = prng.nextInt(1000000000);
     private Boolean am_controller = false;
     private Task current_task;
+    private Election current_election;
 
     
     // other useful instance variables here
@@ -45,6 +46,14 @@ public class ProcessState {
         this.am_controller = true;
     }
     
+    public void demoteToClient() {
+        if ( this.am_controller == true ) {
+            System.out.println("ID: " + this.getMyID() + " - demoted to client!");
+            logger.info("ID: " + this.getMyID() + " - demoted to client!");
+            this.am_controller = false;
+        }
+    }
+    
     public Task currentTask() {
         return this.current_task;
     }
@@ -57,4 +66,17 @@ public class ProcessState {
         this.current_task = null;
     }
 
+    public Election currentElection() {
+        return this.current_election;
+    }
+    
+    public void setCurrentElection(Election election) {
+        //System.out.println("In setCurrentElection!");
+        this.current_election = election;
+    }
+    
+    public void clearCurrentElection() {
+        //System.out.println("In clearCurrentElection!");
+        this.current_election = null;
+    }
 }
