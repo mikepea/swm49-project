@@ -71,7 +71,7 @@ public class Task {
     }
     
     // Return the object as JSON, for passing over message queue
-    public String getTaskAsJSON() {
+    public String serializeAsJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
