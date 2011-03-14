@@ -11,6 +11,7 @@ public class ClientProcess {
     // task queue is provided by the 
     private static String jobs[] = new String[]{"tasks", "locks", "controller"};
     private static ProcessState state = ProcessState.getInstance();
+
     
     /**
     * @param args
@@ -19,7 +20,19 @@ public class ClientProcess {
     
     public static void main(String[] args) throws JMSException {
         
+        if ( args.length > 1 ) {
+            System.err.println("Usage: ClientProcess [jmsServerURI]");
+            System.exit(1);
+        }
+        
+        if ( args.length == 1 ) {
+            config.setJmsServer(args[0]);
+        }
+        
         System.out.println("ID: " + state.getMyID() + " - START UP");
+        System.out.println("ID: " + state.getMyID() + 
+                " - Connecting to JMS Server: " + config.getJmsServer());
+
 
         // start consuming messages from our task queue:
         ClientConsumer consumer = new ClientConsumer();

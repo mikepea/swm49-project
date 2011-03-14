@@ -17,6 +17,10 @@ public class ProcessConfig {
     public String getJmsServer() {
         return jmsServer;
     }
+
+    public void setJmsServer(String server) {
+        this.jmsServer = server;
+    }
     
     public String getLoggerBase() {
         return "swm49";
